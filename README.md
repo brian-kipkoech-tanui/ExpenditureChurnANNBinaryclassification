@@ -1,4 +1,4 @@
-# Artificial Neural Network
+# ANN Classification
 
 ### Importing the libraries
 
@@ -17,98 +17,54 @@ tf.__version__
 
 
 
-    '2.2.0'
+    '2.11.0'
 
 
 
-## Part 1 - Data Preprocessing
+## Data Preprocessing
 
-### Importing the dataset
-
-
-```python
-dataset = pd.read_csv('Churn_Modelling.csv')
-X = dataset.iloc[:, 3:-1].values
-y = dataset.iloc[:, -1].values
-```
+### Importing the Dataset
 
 
 ```python
-print(X)
+dataset = pd.read_excel("./Expenditure-churn (3).xlsx")
+dataset.info()
 ```
 
-    [[619 'France' 'Female' ... 1 1 101348.88]
-     [608 'Spain' 'Female' ... 0 1 112542.58]
-     [502 'France' 'Female' ... 1 0 113931.57]
-     ...
-     [709 'France' 'Female' ... 0 1 42085.58]
-     [772 'Germany' 'Male' ... 1 0 92888.52]
-     [792 'France' 'Female' ... 1 0 38190.78]]
+    <class 'pandas.core.frame.DataFrame'>
+    RangeIndex: 10000 entries, 0 to 9999
+    Data columns (total 12 columns):
+     #   Column    Non-Null Count  Dtype  
+    ---  ------    --------------  -----  
+     0   age       10000 non-null  int64  
+     1   gender    10000 non-null  int64  
+     2   marital   10000 non-null  float64
+     3   dep       10000 non-null  int64  
+     4   Income    10000 non-null  float64
+     5   Job yrs   10000 non-null  int64  
+     6   Town yrs  10000 non-null  int64  
+     7   Yrs Ed    10000 non-null  int64  
+     8   Dri Lic   10000 non-null  int64  
+     9   Own Home  10000 non-null  int64  
+     10  # Cred C  10000 non-null  int64  
+     11  Churn     10000 non-null  int64  
+    dtypes: float64(2), int64(10)
+    memory usage: 937.6 KB
     
 
 
 ```python
-print(y)
+X = dataset.iloc[:,:-1].values
+y = dataset.iloc[:,-1].values
 ```
 
-    [1 0 1 ... 1 1 0]
-    
-
-### Encoding categorical data
-
-Label Encoding the "Gender" column
-
-
-```python
-from sklearn.preprocessing import LabelEncoder
-le = LabelEncoder()
-X[:, 2] = le.fit_transform(X[:, 2])
-```
-
-
-```python
-print(X)
-```
-
-    [[619 'France' 0 ... 1 1 101348.88]
-     [608 'Spain' 0 ... 0 1 112542.58]
-     [502 'France' 0 ... 1 0 113931.57]
-     ...
-     [709 'France' 0 ... 0 1 42085.58]
-     [772 'Germany' 1 ... 1 0 92888.52]
-     [792 'France' 0 ... 1 0 38190.78]]
-    
-
-One Hot Encoding the "Geography" column
-
-
-```python
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder
-ct = ColumnTransformer(transformers=[('encoder', OneHotEncoder(), [1])], remainder='passthrough')
-X = np.array(ct.fit_transform(X))
-```
-
-
-```python
-print(X)
-```
-
-    [[1.0 0.0 0.0 ... 1 1 101348.88]
-     [0.0 0.0 1.0 ... 0 1 112542.58]
-     [1.0 0.0 0.0 ... 1 0 113931.57]
-     ...
-     [1.0 0.0 0.0 ... 0 1 42085.58]
-     [0.0 1.0 0.0 ... 1 0 92888.52]
-     [1.0 0.0 0.0 ... 1 0 38190.78]]
-    
-
-### Splitting the dataset into the Training set and Test set
+### Splitting the data into Training and Test set
 
 
 ```python
 from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
 ```
 
 ### Feature Scaling
@@ -121,37 +77,37 @@ X_train = sc.fit_transform(X_train)
 X_test = sc.transform(X_test)
 ```
 
-## Part 2 - Building the ANN
+## Building the ANN
 
-### Initializing the ANN
+### Initializing the ann
 
 
 ```python
 ann = tf.keras.models.Sequential()
 ```
 
-### Adding the input layer and the first hidden layer
+### Adding the input layer and the first hidden layer  
 
 
 ```python
-ann.add(tf.keras.layers.Dense(units=6, activation='relu'))
+ann.add(tf.keras.layers.Dense(units=64, activation='relu')) 
 ```
 
 ### Adding the second hidden layer
 
 
 ```python
-ann.add(tf.keras.layers.Dense(units=6, activation='relu'))
+ann.add(tf.keras.layers.Dense(units=48, activation='relu'))
 ```
 
-### Adding the output layer
+### Adding the Output layer
 
 
 ```python
 ann.add(tf.keras.layers.Dense(units=1, activation='sigmoid'))
 ```
 
-## Part 3 - Training the ANN
+## Training the ANN
 
 ### Compiling the ANN
 
@@ -160,279 +116,236 @@ ann.add(tf.keras.layers.Dense(units=1, activation='sigmoid'))
 ann.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
 ```
 
-### Training the ANN on the Training set
+### Training the ANN on the Training Set
 
 
 ```python
-ann.fit(X_train, y_train, batch_size = 32, epochs = 100)
+ann.fit(X_train, y_train, batch_size=32, epochs=100)
 ```
 
     Epoch 1/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.8037 - accuracy: 0.5185
+    235/235 [==============================] - 3s 4ms/step - loss: 0.2616 - accuracy: 0.8872
     Epoch 2/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.5291 - accuracy: 0.7901
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0635 - accuracy: 0.9825
     Epoch 3/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.4888 - accuracy: 0.7952
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0398 - accuracy: 0.9871
     Epoch 4/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.4668 - accuracy: 0.7979
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0300 - accuracy: 0.9904
     Epoch 5/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.4478 - accuracy: 0.7994
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0234 - accuracy: 0.9927
     Epoch 6/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.4302 - accuracy: 0.8049
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0192 - accuracy: 0.9943
     Epoch 7/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.4123 - accuracy: 0.8119
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0166 - accuracy: 0.9956
     Epoch 8/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3947 - accuracy: 0.8238
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0144 - accuracy: 0.9959
     Epoch 9/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3807 - accuracy: 0.8355
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0126 - accuracy: 0.9968
     Epoch 10/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3720 - accuracy: 0.8385
+    235/235 [==============================] - 1s 4ms/step - loss: 0.0114 - accuracy: 0.9961
     Epoch 11/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3664 - accuracy: 0.8425
+    235/235 [==============================] - 1s 4ms/step - loss: 0.0106 - accuracy: 0.9968
     Epoch 12/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3629 - accuracy: 0.8416
+    235/235 [==============================] - 1s 4ms/step - loss: 0.0087 - accuracy: 0.9977
     Epoch 13/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3599 - accuracy: 0.8471
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0102 - accuracy: 0.9965
     Epoch 14/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3580 - accuracy: 0.8443
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0075 - accuracy: 0.9977
     Epoch 15/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3564 - accuracy: 0.8456
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0064 - accuracy: 0.9980
     Epoch 16/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3550 - accuracy: 0.8461
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0067 - accuracy: 0.9984
     Epoch 17/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3539 - accuracy: 0.8484
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0053 - accuracy: 0.9988
     Epoch 18/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3530 - accuracy: 0.8478
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0045 - accuracy: 0.9991
     Epoch 19/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3521 - accuracy: 0.8489
+    235/235 [==============================] - 1s 4ms/step - loss: 0.0041 - accuracy: 0.9989
     Epoch 20/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3509 - accuracy: 0.8503
+    235/235 [==============================] - 1s 4ms/step - loss: 0.0065 - accuracy: 0.9975
     Epoch 21/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3498 - accuracy: 0.8540
+    235/235 [==============================] - 1s 4ms/step - loss: 0.0048 - accuracy: 0.9987
     Epoch 22/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3491 - accuracy: 0.8535
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0038 - accuracy: 0.9988
     Epoch 23/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3481 - accuracy: 0.8553
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0026 - accuracy: 0.9995
     Epoch 24/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3476 - accuracy: 0.8534
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0043 - accuracy: 0.9984
     Epoch 25/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3472 - accuracy: 0.8539
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0020 - accuracy: 0.9999
     Epoch 26/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3458 - accuracy: 0.8555
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0023 - accuracy: 0.9996
     Epoch 27/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3452 - accuracy: 0.8554
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0032 - accuracy: 0.9989
     Epoch 28/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3446 - accuracy: 0.8565
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0048 - accuracy: 0.9984
     Epoch 29/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3438 - accuracy: 0.8575
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0050 - accuracy: 0.9981
     Epoch 30/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3433 - accuracy: 0.8587
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0018 - accuracy: 0.9997
     Epoch 31/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3430 - accuracy: 0.8575
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0018 - accuracy: 0.9996
     Epoch 32/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3426 - accuracy: 0.8594
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0018 - accuracy: 0.9997
     Epoch 33/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3420 - accuracy: 0.8601
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0016 - accuracy: 0.9999
     Epoch 34/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3415 - accuracy: 0.8587
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0022 - accuracy: 0.9996
     Epoch 35/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3413 - accuracy: 0.8606
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0023 - accuracy: 0.9993
     Epoch 36/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3411 - accuracy: 0.8614
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0069 - accuracy: 0.9975
     Epoch 37/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3407 - accuracy: 0.8605
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0043 - accuracy: 0.9981
     Epoch 38/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3407 - accuracy: 0.8604
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0018 - accuracy: 0.9996
     Epoch 39/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3404 - accuracy: 0.8601
+    235/235 [==============================] - 1s 3ms/step - loss: 8.0494e-04 - accuracy: 0.9999
     Epoch 40/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3398 - accuracy: 0.8605
+    235/235 [==============================] - 1s 3ms/step - loss: 5.9393e-04 - accuracy: 1.0000
     Epoch 41/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3394 - accuracy: 0.8626
+    235/235 [==============================] - 1s 3ms/step - loss: 5.7110e-04 - accuracy: 1.0000
     Epoch 42/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3393 - accuracy: 0.8621
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0029 - accuracy: 0.9987
     Epoch 43/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3394 - accuracy: 0.8604
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0028 - accuracy: 0.9992
     Epoch 44/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3390 - accuracy: 0.8611
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0015 - accuracy: 0.9995
     Epoch 45/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3387 - accuracy: 0.8627
+    235/235 [==============================] - 1s 3ms/step - loss: 4.0946e-04 - accuracy: 1.0000
     Epoch 46/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3380 - accuracy: 0.8610
+    235/235 [==============================] - 1s 3ms/step - loss: 4.3892e-04 - accuracy: 1.0000
     Epoch 47/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3383 - accuracy: 0.8611
+    235/235 [==============================] - 1s 3ms/step - loss: 3.9667e-04 - accuracy: 1.0000
     Epoch 48/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3384 - accuracy: 0.8608
+    235/235 [==============================] - 1s 3ms/step - loss: 3.2670e-04 - accuracy: 1.0000
     Epoch 49/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3376 - accuracy: 0.8611
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0066 - accuracy: 0.9981
     Epoch 50/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3378 - accuracy: 0.8631
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0062 - accuracy: 0.9981
     Epoch 51/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3372 - accuracy: 0.8619
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0040 - accuracy: 0.9988
     Epoch 52/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3369 - accuracy: 0.8624
+    235/235 [==============================] - 1s 3ms/step - loss: 4.7653e-04 - accuracy: 1.0000
     Epoch 53/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3373 - accuracy: 0.8620
+    235/235 [==============================] - 1s 3ms/step - loss: 3.1398e-04 - accuracy: 1.0000
     Epoch 54/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3365 - accuracy: 0.8635
+    235/235 [==============================] - 1s 3ms/step - loss: 2.4859e-04 - accuracy: 1.0000
     Epoch 55/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3372 - accuracy: 0.8629
+    235/235 [==============================] - 1s 3ms/step - loss: 3.7687e-04 - accuracy: 1.0000
     Epoch 56/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3364 - accuracy: 0.8643
+    235/235 [==============================] - 1s 3ms/step - loss: 2.8085e-04 - accuracy: 1.0000
     Epoch 57/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3364 - accuracy: 0.8629
+    235/235 [==============================] - 1s 3ms/step - loss: 1.9511e-04 - accuracy: 1.0000
     Epoch 58/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3361 - accuracy: 0.8631
+    235/235 [==============================] - 1s 3ms/step - loss: 1.7072e-04 - accuracy: 1.0000
     Epoch 59/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3359 - accuracy: 0.8631
+    235/235 [==============================] - 1s 3ms/step - loss: 1.6152e-04 - accuracy: 1.0000
     Epoch 60/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3356 - accuracy: 0.8626
+    235/235 [==============================] - 1s 3ms/step - loss: 1.6068e-04 - accuracy: 1.0000
     Epoch 61/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3356 - accuracy: 0.8650
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0107 - accuracy: 0.9973
     Epoch 62/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3354 - accuracy: 0.8639
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0038 - accuracy: 0.9981
     Epoch 63/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3352 - accuracy: 0.8641
+    235/235 [==============================] - 1s 3ms/step - loss: 3.4746e-04 - accuracy: 1.0000
     Epoch 64/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3344 - accuracy: 0.8643
+    235/235 [==============================] - 1s 3ms/step - loss: 2.5776e-04 - accuracy: 1.0000
     Epoch 65/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3354 - accuracy: 0.8636
+    235/235 [==============================] - 1s 3ms/step - loss: 2.0422e-04 - accuracy: 1.0000
     Epoch 66/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3348 - accuracy: 0.8650
+    235/235 [==============================] - 1s 3ms/step - loss: 1.5546e-04 - accuracy: 1.0000
     Epoch 67/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3346 - accuracy: 0.8656
+    235/235 [==============================] - 1s 3ms/step - loss: 1.5003e-04 - accuracy: 1.0000
     Epoch 68/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3348 - accuracy: 0.8646
+    235/235 [==============================] - 1s 3ms/step - loss: 1.3928e-04 - accuracy: 1.0000
     Epoch 69/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3341 - accuracy: 0.8644
+    235/235 [==============================] - 1s 3ms/step - loss: 1.3602e-04 - accuracy: 1.0000
     Epoch 70/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3341 - accuracy: 0.8655
+    235/235 [==============================] - 1s 3ms/step - loss: 1.8484e-04 - accuracy: 1.0000
     Epoch 71/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3341 - accuracy: 0.8652
+    235/235 [==============================] - 1s 3ms/step - loss: 4.6412e-04 - accuracy: 0.9999
     Epoch 72/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3340 - accuracy: 0.8655
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0033 - accuracy: 0.9987
     Epoch 73/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3337 - accuracy: 0.8661
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0093 - accuracy: 0.9976
     Epoch 74/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3342 - accuracy: 0.8640
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0022 - accuracy: 0.9993
     Epoch 75/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3337 - accuracy: 0.8650
+    235/235 [==============================] - 1s 3ms/step - loss: 3.5701e-04 - accuracy: 1.0000
     Epoch 76/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3336 - accuracy: 0.8650
+    235/235 [==============================] - 1s 3ms/step - loss: 1.2967e-04 - accuracy: 1.0000
     Epoch 77/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3335 - accuracy: 0.8656
+    235/235 [==============================] - 1s 3ms/step - loss: 9.9854e-05 - accuracy: 1.0000
     Epoch 78/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3331 - accuracy: 0.8652
+    235/235 [==============================] - 1s 3ms/step - loss: 9.9170e-05 - accuracy: 1.0000
     Epoch 79/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3336 - accuracy: 0.8651
+    235/235 [==============================] - 1s 3ms/step - loss: 8.3809e-05 - accuracy: 1.0000
     Epoch 80/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3331 - accuracy: 0.8652
+    235/235 [==============================] - 1s 3ms/step - loss: 9.6040e-05 - accuracy: 1.0000
     Epoch 81/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3332 - accuracy: 0.8643
+    235/235 [==============================] - 1s 3ms/step - loss: 1.0550e-04 - accuracy: 1.0000
     Epoch 82/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3333 - accuracy: 0.8656
+    235/235 [==============================] - 1s 3ms/step - loss: 1.0744e-04 - accuracy: 1.0000
     Epoch 83/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3327 - accuracy: 0.8661
+    235/235 [==============================] - 1s 3ms/step - loss: 1.3892e-04 - accuracy: 1.0000
     Epoch 84/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3328 - accuracy: 0.8651
+    235/235 [==============================] - 1s 3ms/step - loss: 1.0314e-04 - accuracy: 1.0000
     Epoch 85/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3328 - accuracy: 0.8662
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0160 - accuracy: 0.9975
     Epoch 86/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3325 - accuracy: 0.8655
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0038 - accuracy: 0.9985
     Epoch 87/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3327 - accuracy: 0.8654
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0020 - accuracy: 0.9991
     Epoch 88/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3327 - accuracy: 0.8645
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0037 - accuracy: 0.9987
     Epoch 89/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3325 - accuracy: 0.8674
+    235/235 [==============================] - 1s 3ms/step - loss: 4.8882e-04 - accuracy: 1.0000
     Epoch 90/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3322 - accuracy: 0.8655
+    235/235 [==============================] - 1s 3ms/step - loss: 2.2288e-04 - accuracy: 1.0000
     Epoch 91/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3327 - accuracy: 0.8650
+    235/235 [==============================] - 1s 3ms/step - loss: 1.1115e-04 - accuracy: 1.0000
     Epoch 92/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3318 - accuracy: 0.8650
+    235/235 [==============================] - 1s 3ms/step - loss: 9.5189e-05 - accuracy: 1.0000
     Epoch 93/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3322 - accuracy: 0.8635
+    235/235 [==============================] - 1s 3ms/step - loss: 1.0408e-04 - accuracy: 1.0000
     Epoch 94/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3325 - accuracy: 0.8650
+    235/235 [==============================] - 1s 3ms/step - loss: 8.0245e-05 - accuracy: 1.0000
     Epoch 95/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3317 - accuracy: 0.8662
+    235/235 [==============================] - 1s 3ms/step - loss: 9.1883e-05 - accuracy: 1.0000
     Epoch 96/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3318 - accuracy: 0.8646
+    235/235 [==============================] - 1s 3ms/step - loss: 7.3396e-05 - accuracy: 1.0000
     Epoch 97/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3319 - accuracy: 0.8649
+    235/235 [==============================] - 1s 3ms/step - loss: 9.4839e-05 - accuracy: 1.0000
     Epoch 98/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3320 - accuracy: 0.8641
+    235/235 [==============================] - 1s 3ms/step - loss: 7.1007e-05 - accuracy: 1.0000
     Epoch 99/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3314 - accuracy: 0.8648
+    235/235 [==============================] - 1s 3ms/step - loss: 8.0511e-05 - accuracy: 1.0000
     Epoch 100/100
-    250/250 [==============================] - 0s 1ms/step - loss: 0.3314 - accuracy: 0.8660
+    235/235 [==============================] - 1s 3ms/step - loss: 6.7545e-05 - accuracy: 1.0000
     
 
 
 
 
-    <tensorflow.python.keras.callbacks.History at 0x7f8d3ce23978>
+    <keras.callbacks.History at 0x1b04584f788>
 
 
 
-## Part 4 - Making the predictions and evaluating the model
+## Making Predictions and evaluating the model
 
-### Predicting the result of a single observation
-
-**Homework**
-
-Use our ANN model to predict if the customer with the following informations will leave the bank: 
-
-Geography: France
-
-Credit Score: 600
-
-Gender: Male
-
-Age: 40 years old
-
-Tenure: 3 years
-
-Balance: \$ 60000
-
-Number of Products: 2
-
-Does this customer have a credit card ? Yes
-
-Is this customer an Active Member: Yes
-
-Estimated Salary: \$ 50000
-
-So, should we say goodbye to that customer ?
-
-**Solution**
-
-
-```python
-print(ann.predict(sc.transform([[1, 0, 0, 600, 1, 40, 3, 60000, 2, 1, 1, 50000]])) > 0.5)
-```
-
-    [[False]]
-    
-
-Therefore, our ANN model predicts that this customer stays in the bank!
-
-**Important note 1:** Notice that the values of the features were all input in a double pair of square brackets. That's because the "predict" method always expects a 2D array as the format of its inputs. And putting our values into a double pair of square brackets makes the input exactly a 2D array.
-
-**Important note 2:** Notice also that the "France" country was not input as a string in the last column but as "1, 0, 0" in the first three columns. That's because of course the predict method expects the one-hot-encoded values of the state, and as we see in the first row of the matrix of features X, "France" was encoded as "1, 0, 0". And be careful to include these values in the first three columns, because the dummy variables are always created in the first columns.
-
-### Predicting the Test set results
+### Predicting the test set results
 
 
 ```python
 y_pred = ann.predict(X_test)
-y_pred = (y_pred > 0.5)
+y_pred = (y_pred>0.5)
 print(np.concatenate((y_pred.reshape(len(y_pred),1), y_test.reshape(len(y_test),1)),1))
 ```
 
+    79/79 [==============================] - 0s 2ms/step
     [[0 0]
-     [0 1]
+     [0 0]
      [0 0]
      ...
      [0 0]
@@ -444,19 +357,400 @@ print(np.concatenate((y_pred.reshape(len(y_pred),1), y_test.reshape(len(y_test),
 
 
 ```python
-from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, roc_auc_score
 cm = confusion_matrix(y_test, y_pred)
-print(cm)
-accuracy_score(y_test, y_pred)
+# Print the errors
+print("Accuracy Score:   "+str(accuracy_score(y_pred, y_test)*100))
+print("Precision Score:  "+str(precision_score(y_pred, y_test)*100))
+print("Recall Score:     "+str(recall_score(y_pred, y_test)*100))
+print("roc_auc_score:    "+str(accuracy_score(y_pred, y_test)*100))
+print("\nConfusion Matrix:\n", confusion_matrix(y_pred, y_test))
 ```
 
-    [[1516   79]
-     [ 200  205]]
+    Accuracy Score:   99.6
+    Precision Score:  99.26650366748166
+    Recall Score:     99.50980392156863
+    roc_auc_score:    99.6
+    
+    Confusion Matrix:
+     [[1678    6]
+     [   4  812]]
+    
+# ANN Classification
+
+### Importing the libraries
+
+
+```python
+import numpy as np
+import pandas as pd
+import tensorflow as tf
+```
+
+
+```python
+tf.__version__
+```
+
+
+
+
+    '2.11.0'
+
+
+
+## Data Preprocessing
+
+### Importing the Dataset
+
+
+```python
+dataset = pd.read_excel("./Expenditure-churn (3).xlsx")
+dataset.info()
+```
+
+    <class 'pandas.core.frame.DataFrame'>
+    RangeIndex: 10000 entries, 0 to 9999
+    Data columns (total 12 columns):
+     #   Column    Non-Null Count  Dtype  
+    ---  ------    --------------  -----  
+     0   age       10000 non-null  int64  
+     1   gender    10000 non-null  int64  
+     2   marital   10000 non-null  float64
+     3   dep       10000 non-null  int64  
+     4   Income    10000 non-null  float64
+     5   Job yrs   10000 non-null  int64  
+     6   Town yrs  10000 non-null  int64  
+     7   Yrs Ed    10000 non-null  int64  
+     8   Dri Lic   10000 non-null  int64  
+     9   Own Home  10000 non-null  int64  
+     10  # Cred C  10000 non-null  int64  
+     11  Churn     10000 non-null  int64  
+    dtypes: float64(2), int64(10)
+    memory usage: 937.6 KB
+    
+
+
+```python
+X = dataset.iloc[:,:-1].values
+y = dataset.iloc[:,-1].values
+```
+
+### Splitting the data into Training and Test set
+
+
+```python
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
+```
+
+### Feature Scaling
+
+
+```python
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+```
+
+## Building the ANN
+
+### Initializing the ann
+
+
+```python
+ann = tf.keras.models.Sequential()
+```
+
+### Adding the input layer and the first hidden layer  
+
+
+```python
+ann.add(tf.keras.layers.Dense(units=64, activation='relu')) 
+```
+
+### Adding the second hidden layer
+
+
+```python
+ann.add(tf.keras.layers.Dense(units=48, activation='relu'))
+```
+
+### Adding the Output layer
+
+
+```python
+ann.add(tf.keras.layers.Dense(units=1, activation='sigmoid'))
+```
+
+## Training the ANN
+
+### Compiling the ANN
+
+
+```python
+ann.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
+```
+
+### Training the ANN on the Training Set
+
+
+```python
+ann.fit(X_train, y_train, batch_size=32, epochs=100)
+```
+
+    Epoch 1/100
+    235/235 [==============================] - 3s 4ms/step - loss: 0.2616 - accuracy: 0.8872
+    Epoch 2/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0635 - accuracy: 0.9825
+    Epoch 3/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0398 - accuracy: 0.9871
+    Epoch 4/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0300 - accuracy: 0.9904
+    Epoch 5/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0234 - accuracy: 0.9927
+    Epoch 6/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0192 - accuracy: 0.9943
+    Epoch 7/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0166 - accuracy: 0.9956
+    Epoch 8/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0144 - accuracy: 0.9959
+    Epoch 9/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0126 - accuracy: 0.9968
+    Epoch 10/100
+    235/235 [==============================] - 1s 4ms/step - loss: 0.0114 - accuracy: 0.9961
+    Epoch 11/100
+    235/235 [==============================] - 1s 4ms/step - loss: 0.0106 - accuracy: 0.9968
+    Epoch 12/100
+    235/235 [==============================] - 1s 4ms/step - loss: 0.0087 - accuracy: 0.9977
+    Epoch 13/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0102 - accuracy: 0.9965
+    Epoch 14/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0075 - accuracy: 0.9977
+    Epoch 15/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0064 - accuracy: 0.9980
+    Epoch 16/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0067 - accuracy: 0.9984
+    Epoch 17/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0053 - accuracy: 0.9988
+    Epoch 18/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0045 - accuracy: 0.9991
+    Epoch 19/100
+    235/235 [==============================] - 1s 4ms/step - loss: 0.0041 - accuracy: 0.9989
+    Epoch 20/100
+    235/235 [==============================] - 1s 4ms/step - loss: 0.0065 - accuracy: 0.9975
+    Epoch 21/100
+    235/235 [==============================] - 1s 4ms/step - loss: 0.0048 - accuracy: 0.9987
+    Epoch 22/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0038 - accuracy: 0.9988
+    Epoch 23/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0026 - accuracy: 0.9995
+    Epoch 24/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0043 - accuracy: 0.9984
+    Epoch 25/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0020 - accuracy: 0.9999
+    Epoch 26/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0023 - accuracy: 0.9996
+    Epoch 27/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0032 - accuracy: 0.9989
+    Epoch 28/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0048 - accuracy: 0.9984
+    Epoch 29/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0050 - accuracy: 0.9981
+    Epoch 30/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0018 - accuracy: 0.9997
+    Epoch 31/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0018 - accuracy: 0.9996
+    Epoch 32/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0018 - accuracy: 0.9997
+    Epoch 33/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0016 - accuracy: 0.9999
+    Epoch 34/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0022 - accuracy: 0.9996
+    Epoch 35/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0023 - accuracy: 0.9993
+    Epoch 36/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0069 - accuracy: 0.9975
+    Epoch 37/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0043 - accuracy: 0.9981
+    Epoch 38/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0018 - accuracy: 0.9996
+    Epoch 39/100
+    235/235 [==============================] - 1s 3ms/step - loss: 8.0494e-04 - accuracy: 0.9999
+    Epoch 40/100
+    235/235 [==============================] - 1s 3ms/step - loss: 5.9393e-04 - accuracy: 1.0000
+    Epoch 41/100
+    235/235 [==============================] - 1s 3ms/step - loss: 5.7110e-04 - accuracy: 1.0000
+    Epoch 42/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0029 - accuracy: 0.9987
+    Epoch 43/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0028 - accuracy: 0.9992
+    Epoch 44/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0015 - accuracy: 0.9995
+    Epoch 45/100
+    235/235 [==============================] - 1s 3ms/step - loss: 4.0946e-04 - accuracy: 1.0000
+    Epoch 46/100
+    235/235 [==============================] - 1s 3ms/step - loss: 4.3892e-04 - accuracy: 1.0000
+    Epoch 47/100
+    235/235 [==============================] - 1s 3ms/step - loss: 3.9667e-04 - accuracy: 1.0000
+    Epoch 48/100
+    235/235 [==============================] - 1s 3ms/step - loss: 3.2670e-04 - accuracy: 1.0000
+    Epoch 49/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0066 - accuracy: 0.9981
+    Epoch 50/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0062 - accuracy: 0.9981
+    Epoch 51/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0040 - accuracy: 0.9988
+    Epoch 52/100
+    235/235 [==============================] - 1s 3ms/step - loss: 4.7653e-04 - accuracy: 1.0000
+    Epoch 53/100
+    235/235 [==============================] - 1s 3ms/step - loss: 3.1398e-04 - accuracy: 1.0000
+    Epoch 54/100
+    235/235 [==============================] - 1s 3ms/step - loss: 2.4859e-04 - accuracy: 1.0000
+    Epoch 55/100
+    235/235 [==============================] - 1s 3ms/step - loss: 3.7687e-04 - accuracy: 1.0000
+    Epoch 56/100
+    235/235 [==============================] - 1s 3ms/step - loss: 2.8085e-04 - accuracy: 1.0000
+    Epoch 57/100
+    235/235 [==============================] - 1s 3ms/step - loss: 1.9511e-04 - accuracy: 1.0000
+    Epoch 58/100
+    235/235 [==============================] - 1s 3ms/step - loss: 1.7072e-04 - accuracy: 1.0000
+    Epoch 59/100
+    235/235 [==============================] - 1s 3ms/step - loss: 1.6152e-04 - accuracy: 1.0000
+    Epoch 60/100
+    235/235 [==============================] - 1s 3ms/step - loss: 1.6068e-04 - accuracy: 1.0000
+    Epoch 61/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0107 - accuracy: 0.9973
+    Epoch 62/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0038 - accuracy: 0.9981
+    Epoch 63/100
+    235/235 [==============================] - 1s 3ms/step - loss: 3.4746e-04 - accuracy: 1.0000
+    Epoch 64/100
+    235/235 [==============================] - 1s 3ms/step - loss: 2.5776e-04 - accuracy: 1.0000
+    Epoch 65/100
+    235/235 [==============================] - 1s 3ms/step - loss: 2.0422e-04 - accuracy: 1.0000
+    Epoch 66/100
+    235/235 [==============================] - 1s 3ms/step - loss: 1.5546e-04 - accuracy: 1.0000
+    Epoch 67/100
+    235/235 [==============================] - 1s 3ms/step - loss: 1.5003e-04 - accuracy: 1.0000
+    Epoch 68/100
+    235/235 [==============================] - 1s 3ms/step - loss: 1.3928e-04 - accuracy: 1.0000
+    Epoch 69/100
+    235/235 [==============================] - 1s 3ms/step - loss: 1.3602e-04 - accuracy: 1.0000
+    Epoch 70/100
+    235/235 [==============================] - 1s 3ms/step - loss: 1.8484e-04 - accuracy: 1.0000
+    Epoch 71/100
+    235/235 [==============================] - 1s 3ms/step - loss: 4.6412e-04 - accuracy: 0.9999
+    Epoch 72/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0033 - accuracy: 0.9987
+    Epoch 73/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0093 - accuracy: 0.9976
+    Epoch 74/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0022 - accuracy: 0.9993
+    Epoch 75/100
+    235/235 [==============================] - 1s 3ms/step - loss: 3.5701e-04 - accuracy: 1.0000
+    Epoch 76/100
+    235/235 [==============================] - 1s 3ms/step - loss: 1.2967e-04 - accuracy: 1.0000
+    Epoch 77/100
+    235/235 [==============================] - 1s 3ms/step - loss: 9.9854e-05 - accuracy: 1.0000
+    Epoch 78/100
+    235/235 [==============================] - 1s 3ms/step - loss: 9.9170e-05 - accuracy: 1.0000
+    Epoch 79/100
+    235/235 [==============================] - 1s 3ms/step - loss: 8.3809e-05 - accuracy: 1.0000
+    Epoch 80/100
+    235/235 [==============================] - 1s 3ms/step - loss: 9.6040e-05 - accuracy: 1.0000
+    Epoch 81/100
+    235/235 [==============================] - 1s 3ms/step - loss: 1.0550e-04 - accuracy: 1.0000
+    Epoch 82/100
+    235/235 [==============================] - 1s 3ms/step - loss: 1.0744e-04 - accuracy: 1.0000
+    Epoch 83/100
+    235/235 [==============================] - 1s 3ms/step - loss: 1.3892e-04 - accuracy: 1.0000
+    Epoch 84/100
+    235/235 [==============================] - 1s 3ms/step - loss: 1.0314e-04 - accuracy: 1.0000
+    Epoch 85/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0160 - accuracy: 0.9975
+    Epoch 86/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0038 - accuracy: 0.9985
+    Epoch 87/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0020 - accuracy: 0.9991
+    Epoch 88/100
+    235/235 [==============================] - 1s 3ms/step - loss: 0.0037 - accuracy: 0.9987
+    Epoch 89/100
+    235/235 [==============================] - 1s 3ms/step - loss: 4.8882e-04 - accuracy: 1.0000
+    Epoch 90/100
+    235/235 [==============================] - 1s 3ms/step - loss: 2.2288e-04 - accuracy: 1.0000
+    Epoch 91/100
+    235/235 [==============================] - 1s 3ms/step - loss: 1.1115e-04 - accuracy: 1.0000
+    Epoch 92/100
+    235/235 [==============================] - 1s 3ms/step - loss: 9.5189e-05 - accuracy: 1.0000
+    Epoch 93/100
+    235/235 [==============================] - 1s 3ms/step - loss: 1.0408e-04 - accuracy: 1.0000
+    Epoch 94/100
+    235/235 [==============================] - 1s 3ms/step - loss: 8.0245e-05 - accuracy: 1.0000
+    Epoch 95/100
+    235/235 [==============================] - 1s 3ms/step - loss: 9.1883e-05 - accuracy: 1.0000
+    Epoch 96/100
+    235/235 [==============================] - 1s 3ms/step - loss: 7.3396e-05 - accuracy: 1.0000
+    Epoch 97/100
+    235/235 [==============================] - 1s 3ms/step - loss: 9.4839e-05 - accuracy: 1.0000
+    Epoch 98/100
+    235/235 [==============================] - 1s 3ms/step - loss: 7.1007e-05 - accuracy: 1.0000
+    Epoch 99/100
+    235/235 [==============================] - 1s 3ms/step - loss: 8.0511e-05 - accuracy: 1.0000
+    Epoch 100/100
+    235/235 [==============================] - 1s 3ms/step - loss: 6.7545e-05 - accuracy: 1.0000
     
 
 
 
 
-    0.8605
+    <keras.callbacks.History at 0x1b04584f788>
 
 
+
+## Making Predictions and evaluating the model
+
+### Predicting the test set results
+
+
+```python
+y_pred = ann.predict(X_test)
+y_pred = (y_pred>0.5)
+print(np.concatenate((y_pred.reshape(len(y_pred),1), y_test.reshape(len(y_test),1)),1))
+```
+
+    79/79 [==============================] - 0s 2ms/step
+    [[0 0]
+     [0 0]
+     [0 0]
+     ...
+     [0 0]
+     [0 0]
+     [0 0]]
+    
+
+### Making the Confusion Matrix
+
+
+```python
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, roc_auc_score
+cm = confusion_matrix(y_test, y_pred)
+# Print the errors
+print("Accuracy Score:   "+str(accuracy_score(y_pred, y_test)*100))
+print("Precision Score:  "+str(precision_score(y_pred, y_test)*100))
+print("Recall Score:     "+str(recall_score(y_pred, y_test)*100))
+print("roc_auc_score:    "+str(accuracy_score(y_pred, y_test)*100))
+print("\nConfusion Matrix:\n", confusion_matrix(y_pred, y_test))
+```
+
+    Accuracy Score:   99.6
+    Precision Score:  99.26650366748166
+    Recall Score:     99.50980392156863
+    roc_auc_score:    99.6
+    
+    Confusion Matrix:
+     [[1678    6]
+     [   4  812]]
+    
